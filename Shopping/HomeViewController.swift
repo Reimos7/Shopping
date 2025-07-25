@@ -9,14 +9,7 @@ import UIKit
 import SnapKit
 
 final class HomeViewController: UIViewController {
-    /*
-     UISearchBar 에 글자를 입력 후 키보드 Return 을 클릭하면 화면 전환이 됩
-    니다.
-    단, 2글ㅈ화면 전환 시, 입력한 단
-    자 이상 입력한 경우에만 화면 전환이 됩니다.
-    어를 값 전달을 통해 검색 결과 화면으로 전달해주세요
-     */
-    
+  
     let searchBar = UISearchBar()
     
 
