@@ -13,6 +13,9 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .white
+        
+        self.navigationItem.title = "영캠러의 쇼핑쇼핑"
+    
     }
 
 
