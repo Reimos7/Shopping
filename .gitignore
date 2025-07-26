@@ -130,6 +130,8 @@ iOSInjectionProject/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+**/*.xcconfig 
 Shopping/APIKey.swift
 
 # End of https://www.toptal.com/developers/gitignore/api/xcode,macos,swift
