@@ -6,3 +6,15 @@
 //
 
 import Foundation
+
+struct Shopping: Decodable {
+    let total: Int
+    let items: [ShoppingData]
+}
+
+struct ShoppingData: Decodable {
+    let image: String
+    let mallName: String
+    let title: String
+    let lprice: String
+}

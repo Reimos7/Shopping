@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ShoppingListCollectionViewCell: UICollectionViewCell {
     let shoppingImage = UIImageView()
@@ -63,11 +64,17 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         
     }
     
+    func configure(url imageUrl: String) {
+        let url = URL(string: imageUrl)
+        shoppingImage.kf.setImage(with: url)
+        
+    }
+    
     func configureView() {
         shoppingImage.contentMode = .scaleAspectFill
         shoppingImage.clipsToBounds = true
         shoppingImage.layer.cornerRadius = 20
-        shoppingImage.backgroundColor = .yellow
+        //shoppingImage.backgroundColor = .yellow
         
         mallNameLabel.text = "ddd"
         mallNameLabel.font = .systemFont(ofSize: 12)
