@@ -59,36 +59,44 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
             make.top.equalTo(titleLabel.snp.bottom).offset(2)
             make.horizontalEdges.equalTo(contentView.safeAreaLayoutGuide).inset(10)
             make.height.equalTo(20)
-            make.bottom.lessThanOrEqualTo(contentView.safeAreaLayoutGuide)
+            make.bottom.lessThanOrEqualTo(contentView.safeAreaLayoutGuide).offset(-2)
         }
         
     }
     
-    func configure(url imageUrl: String) {
-        let url = URL(string: imageUrl)
+    func configure(url imageUrl: String, mallName: String, title: String, price: String) {
+        guard let url = URL(string: imageUrl),
+              !imageUrl.isEmpty else {
+            shoppingImage.image = UIImage(systemName: "xmark")
+            return
+        }
         shoppingImage.kf.setImage(with: url)
         
-    }
-    
-    func configureView() {
         shoppingImage.contentMode = .scaleAspectFill
         shoppingImage.clipsToBounds = true
         shoppingImage.layer.cornerRadius = 20
         //shoppingImage.backgroundColor = .yellow
         
-        mallNameLabel.text = "ddd"
         mallNameLabel.font = .systemFont(ofSize: 12)
         mallNameLabel.textColor = .darkGray
         mallNameLabel.textAlignment = .left
+        mallNameLabel.text = mallName
         
-        titleLabel.text = "ssss"
         titleLabel.font = .systemFont(ofSize: 13)
         titleLabel.numberOfLines = 0
         titleLabel.textAlignment = .left
+       
+        titleLabel.text = title
         
-        priceLabel.text = "22222222"
+        let intPrice = Int(price) ?? 0
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        let decimalPrice = numberFormatter.string(for: intPrice) ?? price
+        priceLabel.text = decimalPrice
+        
         priceLabel.font = .boldSystemFont(ofSize: 15)
         priceLabel.textAlignment = .left
+        
     }
 
 }

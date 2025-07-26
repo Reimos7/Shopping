@@ -15,7 +15,6 @@ final class ShoppingListViewController: UIViewController {
     
     var navigationTitle = ""
     
-    // TODO: - decimal , 적용하기
     let resultLabel = {
         let label = UILabel()
         label.textColor = .systemGreen
@@ -174,19 +173,15 @@ extension ShoppingListViewController: ViewDesignProtocol {
         switch sender.tag {
         case 0:
             filteredCallRequest(keyword: navigationTitle, sort: .sim)
-            shoppingListCollectionView.reloadData()
             print("정확도")
         case 1:
             filteredCallRequest(keyword: navigationTitle, sort: .date)
-            shoppingListCollectionView.reloadData()
             print("날짜순")
         case 2:
-            filteredCallRequest(keyword: navigationTitle, sort: .asc)
-            shoppingListCollectionView.reloadData()
+            filteredCallRequest(keyword: navigationTitle, sort: .dsc)
             print("가격 높은순")
         case 3:
-            filteredCallRequest(keyword: navigationTitle, sort: .dsc)
-            shoppingListCollectionView.reloadData()
+            filteredCallRequest(keyword: navigationTitle, sort: .asc)
             print("가격 낮은순")
         default:
             print("에러")
@@ -198,8 +193,8 @@ extension ShoppingListViewController: ViewDesignProtocol {
     enum SortOption {
         case sim    // 정확순
         case date   // 날짜순
-        case asc    // 가격 높은순
-        case dsc    // 가격 낮은순
+        case dsc    // 가격 높은순
+        case asc    // 가격 낮은순
         
         var sortOption: String {
             switch self {
@@ -207,10 +202,10 @@ extension ShoppingListViewController: ViewDesignProtocol {
                 return "sim"
             case .date:
                 return "date"
-            case .asc:
-                return "asc"
             case .dsc:
                 return "dsc"
+            case .asc:
+                return "asc"
             }
         }
     }
@@ -259,11 +254,9 @@ extension ShoppingListViewController: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellConfiguration.shoppingCell.identifier, for: indexPath) as! ShoppingListCollectionViewCell
         
         let item = list.items[indexPath.item]
+    
+        cell.configure(url: item.image, mallName: item.mallName, title: item.title, price: item.lprice)
         
-        cell.mallNameLabel.text = item.mallName
-        cell.titleLabel.text = item.title
-        cell.priceLabel.text = item.lprice
-        cell.configure(url: item.image)
         
         return cell
     }
