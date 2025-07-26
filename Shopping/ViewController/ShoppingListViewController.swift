@@ -13,6 +13,8 @@ final class ShoppingListViewController: UIViewController {
     
     var list: Shopping = Shopping(total: 0, items: [])
     
+    var navigationTitle = ""
+    
     // TODO: - decimal , 적용하기
     let resultLabel = {
         let label = UILabel()
@@ -44,8 +46,6 @@ final class ShoppingListViewController: UIViewController {
         return collectionView
     }()
     
-    
-    var navigationTitle = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -158,50 +158,94 @@ extension ShoppingListViewController: ViewDesignProtocol {
             }()
             
             
-            // button.tag = i
             filterButtonStackView.addArrangedSubview(button)
             
             button.addTarget(self, action: #selector(tappedButton), for: .touchUpInside)
         }
-        // print("--=============================================")
-        //print(buttons)
-        //createButtons(buttons: buttons)
         
     }
     
+    
+    // MARK: - 정렬 버튼 클릭
     @objc
     func tappedButton(sender: UIButton) {
         print(#function, sender.tag)
         
         switch sender.tag {
         case 0:
+            filteredCallRequest(keyword: navigationTitle, sort: .sim)
+            shoppingListCollectionView.reloadData()
             print("정확도")
         case 1:
+            filteredCallRequest(keyword: navigationTitle, sort: .date)
+            shoppingListCollectionView.reloadData()
             print("날짜순")
         case 2:
+            filteredCallRequest(keyword: navigationTitle, sort: .asc)
+            shoppingListCollectionView.reloadData()
             print("가격 높은순")
         case 3:
+            filteredCallRequest(keyword: navigationTitle, sort: .dsc)
+            shoppingListCollectionView.reloadData()
             print("가격 낮은순")
         default:
-            print("hh")
+            print("에러")
         }
         
     }
     
-    //    private func createButtons(buttons: [UIButton]) {
-    //        let backgroundView = UIView()
-    //        
-    //        let butonView =  {
-    //            let view = UIView()
-    //            view.layer.cornerRadius = 10
-    //            return view
-    //        }()
-    //        
-    //        let buttons = {
-    //            
-    //        }
-    //    }
+    // MARK: - 필터 정렬 버튼을 위한 Enum
+    enum SortOption {
+        case sim    // 정확순
+        case date   // 날짜순
+        case asc    // 가격 높은순
+        case dsc    // 가격 낮은순
+        
+        var sortOption: String {
+            switch self {
+            case .sim:
+                return "sim"
+            case .date:
+                return "date"
+            case .asc:
+                return "asc"
+            case .dsc:
+                return "dsc"
+            }
+        }
+    }
     
+    
+    // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
+    private func filteredCallRequest(keyword: String, sort: SortOption) {
+        var url = APIKey.shoppingURL
+        url += keyword
+        url += "&display=100"
+        url += "&sort=\(sort)"
+        
+        let header: HTTPHeaders = [
+            "X-Naver-Client-Id": APIKey.clientID,
+            "X-Naver-Client-Secret": APIKey.clientSecret
+        ]
+        
+        AF.request(url, method: .get, headers: header)
+            .validate(statusCode: 200..<300)
+            // 기본적으로 MainThread에서 실행됨
+            .responseDecodable(of: Shopping.self) { response in
+                switch response.result {
+                case .success(let value):
+                    print("sucess", value)
+                    // 지금실행하는 코드가 main인지
+                    print(Thread.isMainThread)
+                    
+                    self.list = value
+                    self.shoppingListCollectionView.reloadData()
+   
+                case .failure(let error):
+                    print("error", error)
+            }
+        }
+    }
 }
 
 
