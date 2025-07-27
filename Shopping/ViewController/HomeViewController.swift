@@ -84,7 +84,11 @@ final class HomeViewController: UIViewController {
                         let shoppingListVC = ShoppingListViewController()
                         shoppingListVC.navigationTitle = keyword
                         shoppingListVC.list = value
-                        self.navigationController?.pushViewController(shoppingListVC, animated: true)
+                        
+                        // VC Extension - push 적용
+                        self.transitionVC(shoppingListVC, style: .push)
+                        //self.transitionVC(shoppingListVC, style: .present)
+                        //self.navigationController?.pushViewController(shoppingListVC, animated: true)
                     }
 
                     
@@ -161,16 +165,28 @@ extension HomeViewController: ViewDesignProtocol {
         
     }
 }
+
+
+// MARK: - UISearchBarDelegate
 extension HomeViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         print(#function)
         
-        guard let searchText = searchBar.text,
-              !searchText.isEmpty else { return }
+        guard let searchText = searchBar.text else {return}
         
+        // 공백 제거
+        let trimmedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // 공백이거나 2글자 미만인 경우 alert 실행
+        if trimmedSearchText.isEmpty || trimmedSearchText.count < 2 {
+            showAlert(title: "검색 오류", message: "공백이거나 2글자 미만입니다.\n2글자 이상 입력 부탁드립니다.", preferredStyle: .alert)
+            return
+        }
         // 2글자 이상 입력시 화면 전환
-        if searchText.count >= 2 {
-            callRequest(keyword: searchText)
+        callRequest(keyword: trimmedSearchText)
+        
+       // if searchText.count >= 2 {
+           // callRequest(keyword: searchText)
 //            let shoppingList = ShoppingListViewController()
 //            shoppingList.navigationTitle = searchText
 //            shoppingList.list = list
@@ -178,7 +194,7 @@ extension HomeViewController: UISearchBarDelegate {
 //            navigationController?.pushViewController(shoppingList, animated: true)
 //            
            
-        }
+       // }
         
     }
     
