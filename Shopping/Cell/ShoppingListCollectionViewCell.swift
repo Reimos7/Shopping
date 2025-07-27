@@ -78,7 +78,8 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         //shoppingImage.backgroundColor = .yellow
         
         mallNameLabel.font = .systemFont(ofSize: 12)
-        mallNameLabel.textColor = .darkGray
+        mallNameLabel.textColor = .systemGray
+
         mallNameLabel.textAlignment = .left
         mallNameLabel.text = mallName
         
@@ -97,6 +98,10 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         priceLabel.font = .boldSystemFont(ofSize: 15)
         priceLabel.textAlignment = .left
         
+    }
+    
+    func configureView() {
+       
     }
 
 }
