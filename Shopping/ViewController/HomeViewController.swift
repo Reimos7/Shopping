@@ -11,18 +11,18 @@ import Alamofire
 
 final class HomeViewController: UIViewController {
   
-    let searchBar = UISearchBar()
+    private let searchBar = UISearchBar()
     
     var list: Shopping = Shopping(total: 0, items: [])
     
-    let homeImage = {
+    private let homeImage = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.image = UIImage(resource: .shoppingPerson)
         return image
     }()
     
-    let homeImageLabel = {
+    private let homeImageLabel = {
         let label = UILabel()
         label.text = "쇼핑하구팡"
         label.textAlignment = .center
@@ -53,11 +53,15 @@ final class HomeViewController: UIViewController {
     
     private func setupSearchBar() {
         searchBar.placeholder = "브랜드, 상품, 프로필, 태그등 "
+        searchBar.delegate = self
+        searchBar.backgroundColor = .systemBackground
+        searchBar.tintColor = .label
+        
     }
     
-    
+    // TODO: - URLComponents 적용
     // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
-    func callRequest(keyword: String) {
+    private func callRequest(keyword: String) {
         var url = APIKey.shoppingURL
         url += keyword
         url += "&display=100"
@@ -84,7 +88,8 @@ final class HomeViewController: UIViewController {
                         let shoppingListVC = ShoppingListViewController()
                         shoppingListVC.navigationTitle = keyword
                         shoppingListVC.list = value
-                        
+                        // 서치바 검색창 비워주기 -> push 후 다시 돌아오면 사용자가 검색어를 바로 입력할 수 있게 해줌
+                        self.searchBar.text = ""
                         // VC Extension - push 적용
                         self.transitionVC(shoppingListVC, style: .push)
                         //self.transitionVC(shoppingListVC, style: .present)
@@ -94,6 +99,7 @@ final class HomeViewController: UIViewController {
                     
                 case .failure(let error):
                     print("error", error)
+                    // TODO: - LocalizedError 사용해서 처리하기
                 }
                         
             }
@@ -106,9 +112,13 @@ final class HomeViewController: UIViewController {
 
 extension HomeViewController: ViewDesignProtocol {
     func configureHierarchy() {
-        view.addSubview(searchBar)
-        view.addSubview(homeImage)
-        view.addSubview(homeImageLabel)
+        
+        [searchBar, homeImage, homeImageLabel].forEach {
+            view.addSubview($0)
+        }
+//        view.addSubview(searchBar)
+//        view.addSubview(homeImage)
+//        view.addSubview(homeImageLabel)
     }
     
     func configureLayout() {
@@ -139,10 +149,6 @@ extension HomeViewController: ViewDesignProtocol {
         navigationController?.navigationBar.tintColor = .label
         // 네비게이션 백버튼 지우기 < 만 보이게
         navigationItem.backButtonTitle = ""
-        
-        searchBar.searchBarStyle = .minimal
-        searchBar.tintColor = .label
-        searchBar.delegate = self
         
         setDarkModeSwitch()
     }

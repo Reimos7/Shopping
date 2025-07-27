@@ -15,14 +15,15 @@ final class ShoppingListViewController: UIViewController {
     
     var navigationTitle = ""
     
-    let resultLabel = {
+    private let resultLabel = {
         let label = UILabel()
         label.textColor = .systemGreen
         label.textAlignment = .left
         return label
     }()
     
-    // TODO: - 스택뷰 내부에 <정확도, 날짜순, 가격높은순, 가격낮은순> 버튼 4개 넣기
+    
+    // MARK: - 스택뷰 내부에 필터 버튼 4개
     lazy var filterButtonStackView: UIStackView = {
         
         // arrangedSubviews 생성자의 스택뷰에 올리고 싶은걸 올리기
@@ -60,7 +61,7 @@ final class ShoppingListViewController: UIViewController {
     
     
     // collectionView 세팅 함수
-    func configureCollectionView(sectionInsets: CGFloat, minimumSpacing: CGFloat, cellCount: CGFloat, itemSpacing: Int, lineSpacing: CGFloat, scrollDirectoin: UICollectionView.ScrollDirection) {
+    private func configureCollectionView(sectionInsets: CGFloat, minimumSpacing: CGFloat, cellCount: CGFloat, itemSpacing: Int, lineSpacing: CGFloat, scrollDirectoin: UICollectionView.ScrollDirection) {
         let layout = UICollectionViewFlowLayout()
         
         // 너비
@@ -89,9 +90,13 @@ final class ShoppingListViewController: UIViewController {
 // MARK: - ViewDesignProtocol
 extension ShoppingListViewController: ViewDesignProtocol {
     func configureHierarchy() {
-        view.addSubview(resultLabel)
-        view.addSubview(filterButtonStackView)
-        view.addSubview(shoppingListCollectionView)
+        
+        [resultLabel, filterButtonStackView, shoppingListCollectionView].forEach {
+            view.addSubview($0)
+        }
+//        view.addSubview(resultLabel)
+//        view.addSubview(filterButtonStackView)
+//        view.addSubview(shoppingListCollectionView)
         
     }
     
@@ -118,8 +123,6 @@ extension ShoppingListViewController: ViewDesignProtocol {
     }
     
     func configureView() {
-        view.backgroundColor = .white
-        
         shoppingListCollectionView.register(ShoppingListCollectionViewCell.self, forCellWithReuseIdentifier: CellConfiguration.shoppingCell.identifier)
         
         let numberFormatter = NumberFormatter()
@@ -270,52 +273,32 @@ extension ShoppingListViewController: ViewDesignProtocol {
         // 실제 클릭한 버튼만 다크모드 대응해서 색상 적용
         tappedButtonSwitchColor(button: sender)
         
+        // 버튼의 tag 값을 기반으로 SortOption enum으로 변환
+        let sortOption = SortOption(rawValue: sender.tag) ?? .sim
         
-        switch sender.tag {
-        case 0:
+        switch sortOption {
+        case .sim:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .sim)
             print("정확도")
-        case 1:
+        case .date:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .date)
             print("날짜순")
-        case 2:
+        case .dsc:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .dsc)
             print("가격 높은순")
-        case 3:
+        case .asc:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .asc)
             print("가격 낮은순")
-        default:
-            print("에러")
-        }
-        
-    }
-    
-    // MARK: - 필터 정렬 버튼을 위한 Enum
-    enum SortOption {
-        case sim    // 정확순
-        case date   // 날짜순
-        case dsc    // 가격 높은순
-        case asc    // 가격 낮은순
-        
-        var sortOption: String {
-            switch self {
-            case .sim:
-                return "sim"
-            case .date:
-                return "date"
-            case .dsc:
-                return "dsc"
-            case .asc:
-                return "asc"
-            }
         }
     }
     
+   
     
+    // TODO: - URLComponents 적용
     // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
     private func filteredCallRequest(keyword: String, sort: SortOption) {
         var url = APIKey.shoppingURL

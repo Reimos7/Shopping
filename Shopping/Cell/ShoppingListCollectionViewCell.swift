@@ -9,14 +9,50 @@ import UIKit
 import Kingfisher
 
 final class ShoppingListCollectionViewCell: UICollectionViewCell {
-    let shoppingImage = UIImageView()
-    let mallNameLabel = UILabel()
-    let titleLabel = UILabel()
-    let priceLabel = UILabel()
+    private let shoppingImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 20
+        return imageView
+    }()
     
-    let likeButtonView = UIView()
-    let likeButton = UIButton()
-  
+    private let mallNameLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = .systemGray
+        label.textAlignment = .left
+        return label
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13)
+        label.numberOfLines = 0
+        label.textAlignment = .left
+        return label
+    }()
+    
+    private let priceLabel: UILabel = {
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 15)
+        label.textAlignment = .left
+        return label
+    }()
+    
+    private let likeButtonView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 16
+        return view
+    }()
+    
+    private let likeButton: UIButton = {
+        let button = UIButton()
+        button.tintColor = .black
+        return button
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureHierarchy()
@@ -32,13 +68,20 @@ final class ShoppingListCollectionViewCell: UICollectionViewCell {
 
 extension ShoppingListCollectionViewCell: ViewDesignProtocol {
     func configureHierarchy() {
-        contentView.addSubview(shoppingImage)
-        contentView.addSubview(mallNameLabel)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(priceLabel)
         
-        contentView.addSubview(likeButtonView)
-        contentView.addSubview(likeButton)
+        // 고차함수 방식으로
+        [shoppingImage, mallNameLabel, titleLabel, priceLabel, likeButtonView, likeButton].forEach {
+            contentView.addSubview($0)
+        }
+        
+        //        contentView.addSubview(shoppingImage)
+        //        contentView.addSubview(mallNameLabel)
+        //        contentView.addSubview(titleLabel)
+        //        contentView.addSubview(priceLabel)
+        //
+        //        contentView.addSubview(likeButtonView)
+        //        contentView.addSubview(likeButton)
+        
     }
     
     func configureLayout() {
@@ -86,23 +129,9 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
             shoppingImage.image = UIImage(systemName: "xmark")
             return
         }
+        
         shoppingImage.kf.setImage(with: url)
-        
-        shoppingImage.contentMode = .scaleAspectFill
-        shoppingImage.clipsToBounds = true
-        shoppingImage.layer.cornerRadius = 20
-        //shoppingImage.backgroundColor = .yellow
-        
-        mallNameLabel.font = .systemFont(ofSize: 12)
-        mallNameLabel.textColor = .systemGray
-
-        mallNameLabel.textAlignment = .left
         mallNameLabel.text = mallName
-        
-        titleLabel.font = .systemFont(ofSize: 13)
-        titleLabel.numberOfLines = 0
-        titleLabel.textAlignment = .left
-       
         titleLabel.text = title
         
         let intPrice = Int(price) ?? 0
@@ -110,9 +139,6 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         numberFormatter.numberStyle = .decimal
         let decimalPrice = numberFormatter.string(for: intPrice) ?? price
         priceLabel.text = decimalPrice
-        
-        priceLabel.font = .boldSystemFont(ofSize: 15)
-        priceLabel.textAlignment = .left
         
     }
     
@@ -156,5 +182,4 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         let imageName = isLiked ? "heart.fill" : "heart"
         likeButton.setImage(UIImage(systemName: imageName), for: .normal)
     }
-
 }
