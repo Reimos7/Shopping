@@ -13,6 +13,9 @@ final class ShoppingListCollectionViewCell: UICollectionViewCell {
     let mallNameLabel = UILabel()
     let titleLabel = UILabel()
     let priceLabel = UILabel()
+    
+    let likeButtonView = UIView()
+    let likeButton = UIButton()
   
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -33,6 +36,9 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         contentView.addSubview(mallNameLabel)
         contentView.addSubview(titleLabel)
         contentView.addSubview(priceLabel)
+        
+        contentView.addSubview(likeButtonView)
+        contentView.addSubview(likeButton)
     }
     
     func configureLayout() {
@@ -60,6 +66,16 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
             make.horizontalEdges.equalTo(contentView.safeAreaLayoutGuide).inset(10)
             make.height.equalTo(20)
             make.bottom.lessThanOrEqualTo(contentView.safeAreaLayoutGuide).offset(-2)
+        }
+        
+        likeButtonView.snp.makeConstraints { make in
+            make.trailing.equalTo(shoppingImage.snp.trailing).inset(10)
+            make.bottom.equalTo(shoppingImage.snp.bottom).inset(10)
+            make.size.equalTo(32)
+        }
+        
+        likeButton.snp.makeConstraints { make in
+            make.edges.equalTo(likeButtonView)
         }
         
     }
@@ -101,7 +117,44 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
     }
     
     func configureView() {
-       
+        setLikeButton()
+    }
+    
+    // 좋아요 버튼 설정
+    private func setLikeButton() {
+        likeButtonView.backgroundColor = .white
+        // 정원 만들기
+        likeButtonView.layer.cornerRadius = 16
+        
+        likeButton.tintColor = .black
+        // 처음엔 전부 false 처리
+        updateLikeButtonUI(isLiked: false)
+        
+        likeButton.addTarget(self, action: #selector(tappedLikeButton), for: .touchUpInside)
+    }
+    
+    
+    // MARK: - 좋아요 버튼 클릭
+    @objc
+    func tappedLikeButton() {
+        print(#function)
+        likeButton.isSelected.toggle()
+        updateLikeButtonUI(isLiked: likeButton.isSelected)
+        
+        // TODO: - userDefaults
+        if likeButton.isSelected {
+            print("좋아요")
+            
+        } else {
+            print("좋아요 해제")
+        }
+        
+    }
+    
+    // 버튼 이미지 변경
+    private func updateLikeButtonUI(isLiked: Bool) {
+        let imageName = isLiked ? "heart.fill" : "heart"
+        likeButton.setImage(UIImage(systemName: imageName), for: .normal)
     }
 
 }
