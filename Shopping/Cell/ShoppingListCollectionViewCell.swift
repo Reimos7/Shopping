@@ -132,7 +132,8 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         
         shoppingImage.kf.setImage(with: url)
         mallNameLabel.text = mallName
-        titleLabel.text = title
+        // extension 적용 / 계산속성도 있음
+        titleLabel.text = title.strippingHTML()
         
         let intPrice = Int(price) ?? 0
         let numberFormatter = NumberFormatter()
