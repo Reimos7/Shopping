@@ -18,6 +18,14 @@ final class ShoppingListViewController: UIViewController {
     
     var navigationTitle = ""
     
+    // ActivityIndicator
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        // 애니메이션 중(빙글빙글 돌아가게)에만 보여지게 할 것인지
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     private let resultLabel = {
         let label = UILabel()
         label.textColor = .systemGreen
@@ -94,7 +102,7 @@ final class ShoppingListViewController: UIViewController {
 extension ShoppingListViewController: ViewDesignProtocol {
     func configureHierarchy() {
         
-        [resultLabel, filterButtonStackView, shoppingListCollectionView].forEach {
+        [resultLabel, filterButtonStackView, shoppingListCollectionView, activityIndicator].forEach {
             view.addSubview($0)
         }
 //        view.addSubview(resultLabel)
@@ -122,6 +130,10 @@ extension ShoppingListViewController: ViewDesignProtocol {
             make.top.equalTo(filterButtonStackView.snp.bottom).offset(10)
             make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
             make.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
@@ -328,6 +340,9 @@ extension ShoppingListViewController: ViewDesignProtocol {
     // TODO: - URLComponents 적용
     // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
     private func filteredCallRequest(keyword: String, sort: SortOption) {
+        // ActivityIndicator 시작
+        activityIndicator.startAnimating()
+        
         var url = APIKey.shoppingURL
         url += keyword
         url += "&display=30"
@@ -344,6 +359,10 @@ extension ShoppingListViewController: ViewDesignProtocol {
             .validate(statusCode: 200..<300)
             // 기본적으로 MainThread에서 실행됨
             .responseDecodable(of: Shopping.self) { response in
+                
+                // ActivityIndicator 멈추기
+                self.activityIndicator.stopAnimating ()
+                
                 switch response.result {
                 case .success(let value):
                    // print("sucess", value)
@@ -361,6 +380,11 @@ extension ShoppingListViewController: ViewDesignProtocol {
    
                 case .failure(let error):
                     print("error", error)
+                    if let statusCode = response.response?.statusCode,
+                        statusCode == 429 {
+                        print("-------------------------429-------------------------------")
+                        self.showAlert(title: "요청 제한", message: "요청이 너무 많아요\n 잠시 후 다시 시도해주세요.", preferredStyle: .alert)
+                    }
             }
         }
     }
