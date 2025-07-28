@@ -13,7 +13,7 @@ final class HomeViewController: UIViewController {
   
     private let searchBar = UISearchBar()
     
-    var list: Shopping = Shopping(total: 0, items: [])
+    var list: Shopping = Shopping(total: 0, display: 0, start: 0, items: [])
     
     private let homeImage = {
         let image = UIImageView()
@@ -64,9 +64,7 @@ final class HomeViewController: UIViewController {
     private func callRequest(keyword: String) {
         var url = APIKey.shoppingURL
         url += keyword
-        url += "&display=100"
-        
-        
+        url += "&display=30"
         
         let header: HTTPHeaders = [
             "X-Naver-Client-Id": APIKey.clientID,

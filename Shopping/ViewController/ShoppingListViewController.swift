@@ -10,8 +10,11 @@ import SnapKit
 import Alamofire
 
 final class ShoppingListViewController: UIViewController {
+    var currenSortButton: SortOption = .sim
     
-    var list: Shopping = Shopping(total: 0, items: [])
+    var list: Shopping = Shopping(total: 0, display: 0, start: 0,items: [])
+    
+    var start = 1
     
     var navigationTitle = ""
     
@@ -281,9 +284,12 @@ extension ShoppingListViewController: ViewDesignProtocol {
             
         }
         
-    
-        
         sender.isSelected = true
+        
+        // 다른 검색어로 바꾸면 리셋이 아니라 계속 append 있음 ... 새로운 정렬버튼이 클릭 되면 지우기
+        // 그리고 start도 다시 1부터로 변경하기
+        list.items.removeAll()
+        start = 1
         
         
         // 실제 클릭한 버튼만 다크모드 대응해서 색상 적용
@@ -296,18 +302,23 @@ extension ShoppingListViewController: ViewDesignProtocol {
         case .sim:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .sim)
+            //print(sortOption)
+            currenSortButton = sortOption
             print("정확도")
         case .date:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .date)
+            currenSortButton = sortOption
             print("날짜순")
         case .dsc:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .dsc)
+            currenSortButton = sortOption
             print("가격 높은순")
         case .asc:
             //tappedButtonSwitchColor(button: sender)
             filteredCallRequest(keyword: navigationTitle, sort: .asc)
+            currenSortButton = sortOption
             print("가격 낮은순")
         }
     }
@@ -319,9 +330,11 @@ extension ShoppingListViewController: ViewDesignProtocol {
     private func filteredCallRequest(keyword: String, sort: SortOption) {
         var url = APIKey.shoppingURL
         url += keyword
-        url += "&display=100"
+        url += "&display=30"
         url += "&sort=\(sort)"
+        url += "&start=\(start)"
         
+        print(url)
         let header: HTTPHeaders = [
             "X-Naver-Client-Id": APIKey.clientID,
             "X-Naver-Client-Secret": APIKey.clientSecret
@@ -337,8 +350,14 @@ extension ShoppingListViewController: ViewDesignProtocol {
                     // 지금실행하는 코드가 main인지
                     print(Thread.isMainThread)
                     
-                    self.list = value
+                    self.list.items.append(contentsOf: value.items)
                     self.shoppingListCollectionView.reloadData()
+                    
+                    
+                    // start 가 1이면, 컬렉션뷰 리로드를 한 다음에 스크롤을 최상단으로 올려줌
+                    if self.start == 1 {
+                        self.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+                    }
    
                 case .failure(let error):
                     print("error", error)
@@ -372,8 +391,16 @@ extension ShoppingListViewController: UICollectionViewDataSource {
 // MARK: - UICollectionViewDelegate
 extension ShoppingListViewController: UICollectionViewDelegate {
     // Pagenation
-//    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-//        <#code#>
-//    }
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        
+        // 25번째 적용
+        if indexPath.row == (list.items.count - 5) /*&& isEnd == false*/ {
+            print(#function, indexPath.row)
+            start += 30
+            print(currenSortButton)
+            filteredCallRequest(keyword: navigationTitle, sort: currenSortButton )
+            
+        }
+    }
     
 }
