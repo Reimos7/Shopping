@@ -256,8 +256,17 @@ extension ShoppingListViewController: ViewDesignProtocol {
     func tappedButton(sender: UIButton) {
         print(#function, sender.tag)
         
+        print("1")
+        if sender.isSelected {
+            print("이미 선택했던 버튼입니다.")
+            print("2")
+            return
+        }
+        print("3")
+        
         // 4개 버튼 모두 색상 초기화
         for buttons in filterButtonStackView.arrangedSubviews {
+            print("4")
             guard let button = buttons as? UIButton else {
                 buttons.layer.borderColor = UIColor.red.cgColor
                 return
@@ -266,9 +275,16 @@ extension ShoppingListViewController: ViewDesignProtocol {
             // clear 해도 배경색이 다크모드 대응이라 좋음
             button.backgroundColor = .clear
             button.setTitleColor(.label, for: .normal)
+            // 전부 false로
+            button.isSelected = false
             updateButtonBorderColor(button: button)
             
         }
+        
+    
+        
+        sender.isSelected = true
+        
         
         // 실제 클릭한 버튼만 다크모드 대응해서 색상 적용
         tappedButtonSwitchColor(button: sender)
@@ -317,7 +333,7 @@ extension ShoppingListViewController: ViewDesignProtocol {
             .responseDecodable(of: Shopping.self) { response in
                 switch response.result {
                 case .success(let value):
-                    print("sucess", value)
+                   // print("sucess", value)
                     // 지금실행하는 코드가 main인지
                     print(Thread.isMainThread)
                     
@@ -355,5 +371,9 @@ extension ShoppingListViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegate
 extension ShoppingListViewController: UICollectionViewDelegate {
+    // Pagenation
+//    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+//        <#code#>
+//    }
     
 }
