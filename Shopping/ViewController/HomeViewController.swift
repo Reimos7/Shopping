@@ -39,12 +39,26 @@ final class HomeViewController: BaseViewController {
         homeView.searchBar.delegate = self
     }
     
-    // TODO: - URLComponents 적용
     // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
     private func callRequest(keyword: String) {
-        var url = APIKey.shoppingURL
-        url += keyword
-        url += "&display=30"
+        var components = URLComponents()
+        
+        components.scheme = "https"
+        components.host = "openapi.naver.com"
+        components.path = "/v1/search/shop.json"
+        
+        components.queryItems = [
+            URLQueryItem(name: "query", value: keyword),
+            URLQueryItem(name: "display", value: "30")
+        ]
+        
+        guard let url = components.url else {
+            print("url 에러")
+            return
+        }
+//        var url = APIKey.shoppingURL
+//        url += keyword
+//        url += "&display=30"
         
         let header: HTTPHeaders = [
             "X-Naver-Client-Id": APIKey.clientID,

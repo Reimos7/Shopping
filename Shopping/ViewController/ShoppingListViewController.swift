@@ -268,11 +268,29 @@ final class ShoppingListViewController: BaseViewController {
         // ActivityIndicator 시작
         shoppingListView.activityIndicator.startAnimating()
         
-        var url = APIKey.shoppingURL
-        url += keyword
-        url += "&display=30"
-        url += "&sort=\(sort)"
-        url += "&start=\(start)"
+        var components = URLComponents()
+        
+        components.scheme = "https"
+        components.host = "openapi.naver.com"
+        components.path = "/v1/search/shop.json"
+        
+        components.queryItems = [
+            URLQueryItem(name: "query", value: keyword),
+            URLQueryItem(name: "display", value: "30"),
+            URLQueryItem(name: "sort", value: "\(sort)"),
+            URLQueryItem(name: "start", value: "\(start)")
+        ]
+        
+        guard let url = components.url else {
+            print("url 에러")
+            return
+        }
+        
+//        var url = APIKey.shoppingURL
+//        url += keyword
+//        url += "&display=30"
+//        url += "&sort=\(sort)"
+//        url += "&start=\(start)"
         
         print(url)
         let header: HTTPHeaders = [
