@@ -9,7 +9,10 @@ import UIKit
 import SnapKit
 import Alamofire
 
-final class ShoppingListViewController: UIViewController {
+final class ShoppingListViewController: BaseViewController {
+    
+    let shoppingListView = ShoppingListView()
+    
     var currenSortButton: SortOption = .sim
     
     var list: Shopping = Shopping(total: 0, display: 0, start: 0,items: [])
@@ -18,56 +21,19 @@ final class ShoppingListViewController: UIViewController {
     
     var navigationTitle = ""
     
-    // ActivityIndicator
-    private let activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        // 애니메이션 중(빙글빙글 돌아가게)에만 보여지게 할 것인지
-        indicator.hidesWhenStopped = true
-        return indicator
-    }()
-    
-    private let resultLabel = {
-        let label = UILabel()
-        label.textColor = .systemGreen
-        label.textAlignment = .left
-        return label
-    }()
-    
-    
-    // MARK: - 스택뷰 내부에 필터 버튼 4개
-    lazy var filterButtonStackView: UIStackView = {
-        
-        // arrangedSubviews 생성자의 스택뷰에 올리고 싶은걸 올리기
-        let st = UIStackView()
-        //let st = UIStackView(arrangedSubviews: [membershipButton,paymentButton,cuponButton])
-        st.spacing = 8 // 스택뷰 내부의 간격을 18만큼 띄어주기
-        st.axis = .horizontal // 스택뷰의 축 vertical = 세로, horizontal = 가로
-        st.distribution = .fillProportionally  // 분배를 어떻게 할래? fillEqually = 높이 간격을 동일하게 채움
-        st.alignment = .center   // 스택뷰 정렬에서는 완전히 채우는 fill이 있다
-        // st.backgroundColor = .red
-        return st
-    }()
-    
-    lazy var shoppingListCollectionView = {
-        // TODO: - 특정 문자열 제거하는 함수 사용해서 보여주기
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
-        //collectionView.backgroundColor = .yellow
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        return collectionView
-    }()
-    
+    override func loadView() {
+        self.view = shoppingListView
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        
         self.navigationItem.title = navigationTitle
         
-        configureHierarchy()
-        configureLayout()
-        configureView()
         configureCollectionView(sectionInsets: 10, minimumSpacing: 10, cellCount: 2, itemSpacing: 10, lineSpacing: 10, scrollDirectoin: .vertical)
-        shoppingListCollectionView.reloadData()
+        shoppingListView.shoppingListCollectionView.dataSource = self
+        shoppingListView.shoppingListCollectionView.delegate = self
+        shoppingListView.shoppingListCollectionView.reloadData()
     }
     
     
@@ -93,59 +59,18 @@ final class ShoppingListViewController: UIViewController {
         
         layout.scrollDirection = scrollDirectoin
         
-        shoppingListCollectionView.collectionViewLayout = layout
+        shoppingListView.shoppingListCollectionView.collectionViewLayout = layout
     }
     
-}
-
-// MARK: - ViewDesignProtocol
-extension ShoppingListViewController: ViewDesignProtocol {
-    func configureHierarchy() {
-        
-        [resultLabel, filterButtonStackView, shoppingListCollectionView, activityIndicator].forEach {
-            view.addSubview($0)
-        }
-//        view.addSubview(resultLabel)
-//        view.addSubview(filterButtonStackView)
-//        view.addSubview(shoppingListCollectionView)
-        
-    }
-    
-    func configureLayout() {
-        resultLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(10)
-            make.height.equalTo(30)
-        }
-        
-        filterButtonStackView.snp.makeConstraints { make in
-            make.top.equalTo(resultLabel.snp.bottom)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).inset(80)
-            make.height.equalTo(40)
-            //make.width.equalTo(200)
-        }
-        
-        shoppingListCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(filterButtonStackView.snp.bottom).offset(10)
-            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
-            make.bottom.equalTo(view.safeAreaLayoutGuide)
-        }
-        
-        activityIndicator.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-    }
-    
-    func configureView() {
-        shoppingListCollectionView.register(ShoppingListCollectionViewCell.self, forCellWithReuseIdentifier: CellConfiguration.shoppingCell.identifier)
+    override func configureView() {
+        shoppingListView.shoppingListCollectionView.register(ShoppingListCollectionViewCell.self, forCellWithReuseIdentifier: CellConfiguration.shoppingCell.identifier)
         
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         
         let total = list.total
         guard let totalResult = numberFormatter.string(for: total) else {return}
-        resultLabel.text = "\(totalResult) 개의 검색 결과"
+        shoppingListView.resultLabel.text = "\(totalResult) 개의 검색 결과"
         // 다크모드 대응
         view.backgroundColor = .systemBackground
         
@@ -182,7 +107,7 @@ extension ShoppingListViewController: ViewDesignProtocol {
             }()
             
             
-            filterButtonStackView.addArrangedSubview(button)
+            shoppingListView.filterButtonStackView.addArrangedSubview(button)
             
             button.addTarget(self, action: #selector(tappedButton), for: .touchUpInside)
         }
@@ -229,7 +154,7 @@ extension ShoppingListViewController: ViewDesignProtocol {
             }
             
             // 스택뷰에 있는 버튼들에 다크모드 대응을 함
-            for buttons in self.filterButtonStackView.arrangedSubviews {
+            for buttons in self.shoppingListView.filterButtonStackView.arrangedSubviews {
                 // buttons view -> button으로 타입 캐스팅 , red <-> 다크모드 대응
                 guard let button = buttons as? UIButton else {
                     // 못하면 red
@@ -280,7 +205,7 @@ extension ShoppingListViewController: ViewDesignProtocol {
         print("3")
         
         // 4개 버튼 모두 색상 초기화
-        for buttons in filterButtonStackView.arrangedSubviews {
+        for buttons in shoppingListView.filterButtonStackView.arrangedSubviews {
             print("4")
             guard let button = buttons as? UIButton else {
                 buttons.layer.borderColor = UIColor.red.cgColor
@@ -341,7 +266,7 @@ extension ShoppingListViewController: ViewDesignProtocol {
     // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
     private func filteredCallRequest(keyword: String, sort: SortOption) {
         // ActivityIndicator 시작
-        activityIndicator.startAnimating()
+        shoppingListView.activityIndicator.startAnimating()
         
         var url = APIKey.shoppingURL
         url += keyword
@@ -361,7 +286,7 @@ extension ShoppingListViewController: ViewDesignProtocol {
             .responseDecodable(of: Shopping.self) { response in
                 
                 // ActivityIndicator 멈추기
-                self.activityIndicator.stopAnimating ()
+                self.shoppingListView.activityIndicator.stopAnimating ()
                 
                 switch response.result {
                 case .success(let value):
@@ -370,12 +295,12 @@ extension ShoppingListViewController: ViewDesignProtocol {
                     print(Thread.isMainThread)
                     
                     self.list.items.append(contentsOf: value.items)
-                    self.shoppingListCollectionView.reloadData()
+                    self.shoppingListView.shoppingListCollectionView.reloadData()
                     
                     
                     // start 가 1이면, 컬렉션뷰 리로드를 한 다음에 스크롤을 최상단으로 올려줌
                     if self.start == 1 {
-                        self.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+                        self.shoppingListView.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
                     }
    
                 case .failure(let error):
@@ -388,8 +313,8 @@ extension ShoppingListViewController: ViewDesignProtocol {
             }
         }
     }
+    
 }
-
 
 // MARK: - UICollectionViewDataSource
 extension ShoppingListViewController: UICollectionViewDataSource {

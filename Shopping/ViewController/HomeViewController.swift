@@ -9,28 +9,19 @@ import UIKit
 import SnapKit
 import Alamofire
 
-final class HomeViewController: UIViewController {
+final class HomeViewController: BaseViewController {
+    // HomeView 가져오기
+    let homeView = HomeView()
   
-    private let searchBar = UISearchBar()
-    
     var list: Shopping = Shopping(total: 0, display: 0, start: 0, items: [])
     
-    private let homeImage = {
-        let image = UIImageView()
-        image.contentMode = .scaleAspectFill
-        image.image = UIImage(resource: .shoppingPerson)
-        return image
-    }()
+    // 밑 바탕의 뷰를 교체함
+    // rootview를 만드는 역할
+    // loadView는 super를 호출하지 않는다.
+    override func loadView() {
+        self.view = homeView
+    }
     
-    private let homeImageLabel = {
-        let label = UILabel()
-        label.text = "쇼핑하구팡"
-        label.textAlignment = .center
-        label.textColor = .label
-        label.font = .boldSystemFont(ofSize: 16)
-        return label
-    }()
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -39,24 +30,13 @@ final class HomeViewController: UIViewController {
             NSAttributedString.Key.foregroundColor: UIColor.label
         ]
         
-        configureHierarchy()
-        configureLayout()
-        configureView()
-        setupSearchBar()
+        //homeView.setupSearchBar()
         
         //let id = Bundle.main.infoDictionary?[X-Naver-Client-Id: X-Naver-Client-Secret]
 //        let id = Bundle.main.object(forInfoDictionaryKey: "X-Naver-Client-Id") as? String
 //        let pwd = Bundle.main.object(forInfoDictionaryKey: <#T##String#>)
 //        print(id)
-        
-    }
-    
-    private func setupSearchBar() {
-        searchBar.placeholder = "브랜드, 상품, 프로필, 태그등 "
-        searchBar.delegate = self
-        searchBar.backgroundColor = .systemBackground
-        searchBar.tintColor = .label
-        
+        homeView.searchBar.delegate = self
     }
     
     // TODO: - URLComponents 적용
@@ -87,7 +67,7 @@ final class HomeViewController: UIViewController {
                         shoppingListVC.navigationTitle = keyword
                         shoppingListVC.list = value
                         // 서치바 검색창 비워주기 -> push 후 다시 돌아오면 사용자가 검색어를 바로 입력할 수 있게 해줌
-                        self.searchBar.text = ""
+                        self.homeView.searchBar.text = ""
                         // VC Extension - push 적용
                         self.transitionVC(shoppingListVC, style: .push)
                         //self.transitionVC(shoppingListVC, style: .present)
@@ -104,43 +84,9 @@ final class HomeViewController: UIViewController {
         
         
     }
-
-
-}
-
-extension HomeViewController: ViewDesignProtocol {
-    func configureHierarchy() {
-        
-        [searchBar, homeImage, homeImageLabel].forEach {
-            view.addSubview($0)
-        }
-//        view.addSubview(searchBar)
-//        view.addSubview(homeImage)
-//        view.addSubview(homeImageLabel)
-    }
+   
     
-    func configureLayout() {
-        searchBar.snp.makeConstraints { make in
-            make.horizontalEdges.top.equalTo(view.safeAreaLayoutGuide)
-            make.height.equalTo(44)
-        }
-        
-        homeImage.snp.makeConstraints { make in
-            make.top.equalTo(searchBar.snp.bottom).offset(100)
-            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(40)
-            make.height.equalTo(homeImage.snp.width)
-        }
-        
-        homeImageLabel.snp.makeConstraints { make in
-            make.top.equalTo(homeImage.snp.bottom)
-            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(100)
-            make.height.equalTo(30)
-        }
-        
-        
-    }
-    
-    func configureView() {
+    override func configureView() {
         //배경을 다크모드 라이트모드 대응
         view.backgroundColor = .systemBackground
         // 네비게이션바 색상 다크모드 대응
@@ -157,19 +103,16 @@ extension HomeViewController: ViewDesignProtocol {
             if self.traitCollection.userInterfaceStyle == .light {
                 // 라이트 모드
                 print("----------라이트모드----------")
-                self.homeImage.image = UIImage(named: "shoppingPerson")
+                //self.homeImage.image = UIImage(named: "shoppingPerson")
+                self.homeView.homeImage.image = UIImage(named: "shoppingPerson")
             } else {
                 // 다크 모드
                 print("----------다크모드----------")
-                self.homeImage.image = UIImage(named: "shoppingPerson")
+                self.homeView.homeImage.image = UIImage(named: "shoppingPerson")
             }
-            
-            
         })
-        
     }
 }
-
 
 // MARK: - UISearchBarDelegate
 extension HomeViewController: UISearchBarDelegate {

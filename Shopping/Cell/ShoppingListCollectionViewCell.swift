@@ -8,7 +8,8 @@
 import UIKit
 import Kingfisher
 
-final class ShoppingListCollectionViewCell: UICollectionViewCell {
+final class ShoppingListCollectionViewCell: BaseCollectionViewCell {
+    
     private let shoppingImage: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -53,38 +54,15 @@ final class ShoppingListCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configureHierarchy()
-        configureLayout()
-        configureView()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-}
 
-extension ShoppingListCollectionViewCell: ViewDesignProtocol {
-    func configureHierarchy() {
-        
+    override func configureHierarchy() {
         // 고차함수 방식으로
         [shoppingImage, mallNameLabel, titleLabel, priceLabel, likeButtonView, likeButton].forEach {
             contentView.addSubview($0)
         }
-        
-        //        contentView.addSubview(shoppingImage)
-        //        contentView.addSubview(mallNameLabel)
-        //        contentView.addSubview(titleLabel)
-        //        contentView.addSubview(priceLabel)
-        //
-        //        contentView.addSubview(likeButtonView)
-        //        contentView.addSubview(likeButton)
-        
     }
     
-    func configureLayout() {
+    override func configureLayout() {
         shoppingImage.snp.makeConstraints { make in
             make.top.equalTo(contentView.safeAreaLayoutGuide)
             make.leading.equalTo(contentView.safeAreaLayoutGuide)
@@ -123,6 +101,11 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         
     }
     
+    
+    override func configureView() {
+        setLikeButton()
+    }
+    
     func configure(url imageUrl: String, mallName: String, title: String, price: String) {
         guard let url = URL(string: imageUrl),
               !imageUrl.isEmpty else {
@@ -142,10 +125,7 @@ extension ShoppingListCollectionViewCell: ViewDesignProtocol {
         priceLabel.text = decimalPrice
         
     }
-    
-    func configureView() {
-        setLikeButton()
-    }
+
     
     // 좋아요 버튼 설정
     private func setLikeButton() {
