@@ -16,6 +16,8 @@ final class ShoppingListViewController: BaseViewController {
     var currenSortButton: SortOption = .sim
     
     var list: Shopping = Shopping(total: 0, display: 0, start: 0,items: [])
+    // 가로 스크롤
+    var horizontalList: Shopping = Shopping(total: 0, display: 0, start: 0,items: [])
     
     var start = 1
     
@@ -31,9 +33,33 @@ final class ShoppingListViewController: BaseViewController {
         self.navigationItem.title = navigationTitle
         
         configureCollectionView(sectionInsets: 10, minimumSpacing: 10, cellCount: 2, itemSpacing: 10, lineSpacing: 10, scrollDirectoin: .vertical)
+        
+        // 수평 스크롤 컬렉션뷰 하나 더 만들어서, 추천 쇼핑 상품 목록 만들어보기
+        configureHorizontalCollectionView()
+        
         shoppingListView.shoppingListCollectionView.dataSource = self
         shoppingListView.shoppingListCollectionView.delegate = self
-        shoppingListView.shoppingListCollectionView.reloadData()
+        
+        shoppingListView.shoppingListHorizontalCollectionView.dataSource = self
+        shoppingListView.shoppingListHorizontalCollectionView.delegate = self
+        
+        callRequestHorizontalCell(keyword: "TensorFlow")
+    }
+    
+    // 가로 스크롤 컬렉션뷰 셀
+    private func configureHorizontalCollectionView() {
+        let layout = UICollectionViewFlowLayout()
+        
+        let cellWidth: CGFloat = 80
+        let cellHeight: CGFloat = 100
+        
+        layout.itemSize = CGSize(width: cellWidth, height: cellHeight)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        layout.minimumInteritemSpacing = 10
+        layout.minimumLineSpacing = 10
+        layout.scrollDirection = .horizontal
+        
+        shoppingListView.shoppingListHorizontalCollectionView.collectionViewLayout = layout
     }
     
     
@@ -48,7 +74,7 @@ final class ShoppingListViewController: BaseViewController {
         let cellWidth = deviceWidth - (sectionInsets * 2) - (minimumSpacing * (cellCount - 1))
         
         let imageHeight = cellWidth / cellCount // 1:1
-        let totalHeight = imageHeight + 90 // 레이블 높이 여백 
+        let totalHeight = imageHeight + 90 // 레이블 높이 여백
         
         layout.itemSize = CGSize(width: cellWidth / cellCount, height: totalHeight)
         layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
@@ -63,7 +89,8 @@ final class ShoppingListViewController: BaseViewController {
     }
     
     override func configureView() {
-        shoppingListView.shoppingListCollectionView.register(ShoppingListCollectionViewCell.self, forCellWithReuseIdentifier: CellConfiguration.shoppingCell.identifier)
+        shoppingListView.shoppingListCollectionView.register(ShoppingListCollectionViewCell.self, forCellWithReuseIdentifier: CellConfiguration.shoppingListCell.identifier)
+        shoppingListView.shoppingListHorizontalCollectionView.register(shoppingListHorizontalCollectionViewCell.self, forCellWithReuseIdentifier: CellConfiguration.shoppingHorizontalCell.identifier)
         
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
@@ -79,11 +106,11 @@ final class ShoppingListViewController: BaseViewController {
         setDarkModeSwitch()
         
     }
-   
+    
     
     private func setupButtons() {
         let buttonTitle = ["정확도", "날짜순", "가격높은순", "가격낮은순"]
-       
+        
         
         var buttons: [UIButton] = []
         
@@ -114,32 +141,32 @@ final class ShoppingListViewController: BaseViewController {
         
         
     }
-        
+    
     // MARK: - 환경이 바뀌면 자동 호출됨 - 다크모드 라이트모드 자동 적용 ios17부터 deprecated... 사용 X
-//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-//        if previousTraitCollection != nil {
-//            
-//            // 다크모드 라이트모드 변경후 수행 할 코드
-////            if previousTraitCollection?.userInterfaceStyle == .dark {
-////                // 다크모드 상태
-////                
-////            } else {
-////                // 다트모드 상태
-////            }
-//            
-//            // 스택뷰에 있는 버튼들에 다크모드 대응을 함
-//            for buttons in filterButtonStackView.arrangedSubviews {
-//                // buttons view -> button으로 타입 캐스팅 해서, red <-> 다크모드 대응
-//                guard let button = buttons as? UIButton else {
-//                    // 못하면 red
-//                    buttons.layer.borderColor = UIColor.red.cgColor
-//                    return
-//                }
-//                // 다크 모드 대응 함수로 처리
-//                updateButtonBorderColor(button: button)
-//            }
-//        }
-//    }
+    //    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    //        if previousTraitCollection != nil {
+    //
+    //            // 다크모드 라이트모드 변경후 수행 할 코드
+    ////            if previousTraitCollection?.userInterfaceStyle == .dark {
+    ////                // 다크모드 상태
+    ////
+    ////            } else {
+    ////                // 다트모드 상태
+    ////            }
+    //
+    //            // 스택뷰에 있는 버튼들에 다크모드 대응을 함
+    //            for buttons in filterButtonStackView.arrangedSubviews {
+    //                // buttons view -> button으로 타입 캐스팅 해서, red <-> 다크모드 대응
+    //                guard let button = buttons as? UIButton else {
+    //                    // 못하면 red
+    //                    buttons.layer.borderColor = UIColor.red.cgColor
+    //                    return
+    //                }
+    //                // 다크 모드 대응 함수로 처리
+    //                updateButtonBorderColor(button: button)
+    //            }
+    //        }
+    //    }
     
     
     // MARK: - ios17+ 다크모드 변경 감지 traitCollectionDidChange 대신 사용
@@ -166,8 +193,8 @@ final class ShoppingListViewController: BaseViewController {
             }
         })
     }
-   
-
+    
+    
     
     // 버튼 테두리 색상 업데이트 함수
     // borderColor는 .label이 적용 안되니까 이렇게 ...
@@ -175,7 +202,7 @@ final class ShoppingListViewController: BaseViewController {
         // 지금 뷰컨이 다크모드
         if traitCollection.userInterfaceStyle == .dark {
             button.layer.borderColor = UIColor.white.cgColor
-        // 지금 뷰컨이 라이트모드
+            // 지금 뷰컨이 라이트모드
         } else {
             button.layer.borderColor = UIColor.black.cgColor
         }
@@ -260,11 +287,12 @@ final class ShoppingListViewController: BaseViewController {
         }
     }
     
-   
+    
     
     // TODO: - URLComponents 적용
     // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
     private func filteredCallRequest(keyword: String, sort: SortOption) {
+        print(#function, "API 호출~~~~~~~~~~~~~~~")
         // ActivityIndicator 시작
         shoppingListView.activityIndicator.startAnimating()
         
@@ -286,11 +314,11 @@ final class ShoppingListViewController: BaseViewController {
             return
         }
         
-//        var url = APIKey.shoppingURL
-//        url += keyword
-//        url += "&display=30"
-//        url += "&sort=\(sort)"
-//        url += "&start=\(start)"
+        //        var url = APIKey.shoppingURL
+        //        url += keyword
+        //        url += "&display=30"
+        //        url += "&sort=\(sort)"
+        //        url += "&start=\(start)"
         
         print(url)
         let header: HTTPHeaders = [
@@ -300,7 +328,7 @@ final class ShoppingListViewController: BaseViewController {
         
         AF.request(url, method: .get, headers: header)
             .validate(statusCode: 200..<300)
-            // 기본적으로 MainThread에서 실행됨
+        // 기본적으로 MainThread에서 실행됨
             .responseDecodable(of: Shopping.self) { response in
                 
                 // ActivityIndicator 멈추기
@@ -308,11 +336,12 @@ final class ShoppingListViewController: BaseViewController {
                 
                 switch response.result {
                 case .success(let value):
-                   // print("sucess", value)
+                    // print("sucess", value)
                     // 지금실행하는 코드가 main인지
                     print(Thread.isMainThread)
                     
                     self.list.items.append(contentsOf: value.items)
+                    self.list.total = value.total
                     self.shoppingListView.shoppingListCollectionView.reloadData()
                     
                     
@@ -320,35 +349,76 @@ final class ShoppingListViewController: BaseViewController {
                     if self.start == 1 {
                         self.shoppingListView.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
                     }
-   
+                    
                 case .failure(let error):
                     print("error", error)
                     if let statusCode = response.response?.statusCode,
-                        statusCode == 429 {
+                       statusCode == 429 {
                         print("-------------------------429-------------------------------")
                         self.showAlert(title: "요청 제한", message: "요청이 너무 많아요\n 잠시 후 다시 시도해주세요.", preferredStyle: .alert)
                     }
+                }
             }
-        }
     }
     
+    private func callRequestHorizontalCell(keyword: String) {
+        NetworkManager.shared.callRequest(keyword: keyword) { [weak self] result in
+            print(#function)
+            // <Shopping, Error>
+            switch result {
+            case .success(let value):
+                
+                self?.horizontalList.items.append(contentsOf: value.items)
+                self?.horizontalList.total = value.total
+                self?.shoppingListView.shoppingListHorizontalCollectionView.reloadData()
+                
+            case .failure(let error):
+                print(error)
+                
+            }
+            
+        }
+        
+    }
 }
 
 // MARK: - UICollectionViewDataSource
 extension ShoppingListViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return list.items.count
+        if collectionView == shoppingListView.shoppingListCollectionView {
+            return list.items.count
+        } else if collectionView == shoppingListView.shoppingListHorizontalCollectionView {
+            
+            return horizontalList.items.count
+        }
+        return 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellConfiguration.shoppingCell.identifier, for: indexPath) as! ShoppingListCollectionViewCell
         
-        let item = list.items[indexPath.item]
-    
-        cell.configure(url: item.image, mallName: item.mallName, title: item.title, price: item.lprice)
+        if collectionView == shoppingListView.shoppingListCollectionView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellConfiguration.shoppingListCell.identifier, for: indexPath) as! ShoppingListCollectionViewCell
+            
+            let item = list.items[indexPath.item]
+            
+            cell.configure(url: item.image, mallName: item.mallName, title: item.title, price: item.lprice)
+            return cell
+            
+        } else if collectionView == shoppingListView.shoppingListHorizontalCollectionView {
+            // 가로 스크롤
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellConfiguration.shoppingHorizontalCell.identifier, for: indexPath) as! shoppingListHorizontalCollectionViewCell
+            
+            let item = horizontalList.items[indexPath.item]
+            cell.configure(url: item.image, name: item.title)
+            
+            return cell
+        }
+        
+        return UICollectionViewCell()
         
         
-        return cell
+        
+        
     }
     
     
@@ -359,15 +429,24 @@ extension ShoppingListViewController: UICollectionViewDataSource {
 extension ShoppingListViewController: UICollectionViewDelegate {
     // Pagenation
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-        // 25번째 적용
-        if indexPath.row == (list.items.count - 5) /*&& isEnd == false*/ {
-            print(#function, indexPath.row)
-            start += 30
-            print(currenSortButton)
-            filteredCallRequest(keyword: navigationTitle, sort: currenSortButton )
-            
+        // 메인 컬렉션뷰
+        if collectionView == shoppingListView.shoppingListCollectionView {
+            //
+            if indexPath.item == (list.items.count - 5) && list.items.count < list.total {
+                print(#function, indexPath.item)
+                //start += 30
+                filteredCallRequest(keyword: navigationTitle, sort: currenSortButton)
+            } else if list.items.count >= list.total {
+                print("====================마지막페이지=============================")
+            }
+        } else if collectionView == shoppingListView.shoppingListHorizontalCollectionView {
+            print("shoppingListHorizontalCollectionView 페이지네이션")
+            if indexPath.item == (horizontalList.items.count - 3) && horizontalList.items.count < horizontalList.total{
+                print("shoppingListHorizontalCollectionView 페이지네이션 실행")
+                callRequestHorizontalCell(keyword: "TensorFlow")
+            } else if list.items.count >= list.total {
+                print("========================블루베리 마지막페이지=============================")
+            }
         }
     }
-    
 }

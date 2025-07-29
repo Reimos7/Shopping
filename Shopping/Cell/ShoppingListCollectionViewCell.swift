@@ -163,4 +163,9 @@ final class ShoppingListCollectionViewCell: BaseCollectionViewCell {
         let imageName = isLiked ? "heart.fill" : "heart"
         likeButton.setImage(UIImage(systemName: imageName), for: .normal)
     }
+//    
+//    override func prepareForReuse() {
+//        super.prepareForReuse()
+//        likeButton.setImage(UIImage(systemName: "heart"), for: .normal)
+//    }
 }

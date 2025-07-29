@@ -45,10 +45,17 @@ class ShoppingListView: BaseView {
         //collectionView.backgroundColor = .yellow
         return collectionView
     }()
-
+    
+    // 수평 스크롤 컬렉션뷰 하나 더 만들어서, 추천 쇼핑 상품 목록 만들어보기
+    lazy var shoppingListHorizontalCollectionView = {
+        let collectionView = UICollectionView(frame: .zero,
+        collectionViewLayout: UICollectionViewLayout())
+        return collectionView
+        
+    }()
 
     override func configureHierarchy() {
-        [resultLabel, filterButtonStackView, shoppingListCollectionView, activityIndicator].forEach {
+        [resultLabel, filterButtonStackView, shoppingListCollectionView, activityIndicator, shoppingListHorizontalCollectionView].forEach {
             addSubview($0)
         }
     }
@@ -71,11 +78,17 @@ class ShoppingListView: BaseView {
         shoppingListCollectionView.snp.makeConstraints { make in
             make.top.equalTo(filterButtonStackView.snp.bottom).offset(10)
             make.horizontalEdges.equalTo(safeAreaLayoutGuide)
-            make.bottom.equalTo(safeAreaLayoutGuide)
+            make.bottom.equalTo(safeAreaLayoutGuide).inset(100)
         }
         
         activityIndicator.snp.makeConstraints { make in
             make.center.equalToSuperview()
+        }
+        
+        shoppingListHorizontalCollectionView.snp.makeConstraints { make in
+            make.top.equalTo(shoppingListCollectionView.snp.bottom).offset(4)
+            make.horizontalEdges.equalTo(safeAreaLayoutGuide)
+            make.bottom.equalTo(safeAreaLayoutGuide)
         }
     }
     

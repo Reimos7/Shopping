@@ -48,6 +48,7 @@ final class HomeViewController: BaseViewController {
                 switch result {
                 case .success(let value):
                     let shoppingListVC = ShoppingListViewController()
+                    print(#function, "네트워킹 검색")
                     shoppingListVC.navigationTitle = keyword
                     shoppingListVC.list = value
                     // 서치바 검색창 비워주기 -> push 후 다시 돌아오면 사용자가 검색어를 바로 입력할 수 있게 해줌

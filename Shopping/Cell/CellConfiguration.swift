@@ -8,19 +8,24 @@
 import Foundation
 
 enum CellConfiguration {
-    case shoppingCell
+    case shoppingListCell
+    case shoppingHorizontalCell
     
     var nibName: String {
         switch self {
-        case .shoppingCell:
+        case .shoppingListCell:
             return "ShoppingListCollectionViewCell"
+        case .shoppingHorizontalCell:
+            return "shoppingListHorizontalCollectionViewCell"
         }
     }
     
     var identifier: String {
         switch self {
-        case .shoppingCell:
+        case .shoppingListCell:
             return "ShoppingListCollectionViewCell"
+        case .shoppingHorizontalCell:
+            return "shoppingListHorizontalCollectionViewCell"
         }
     }
 }
