@@ -60,6 +60,8 @@ final class HomeViewController: BaseViewController {
                     
                 case .failure(let error):
                     print(error)
+                    // TODO: - Enum - 구조체 로 다시 하기
+                    self?.showAlert(title: "에러", message: "네트워크 문제 발생", preferredStyle: .alert)
 
                 }
             }
