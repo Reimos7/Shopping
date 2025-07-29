@@ -288,79 +288,34 @@ final class ShoppingListViewController: BaseViewController {
     }
     
     
+   
     
-    // TODO: - URLComponents 적용
-    // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
     private func filteredCallRequest(keyword: String, sort: SortOption) {
-        print(#function, "API 호출~~~~~~~~~~~~~~~")
-        // ActivityIndicator 시작
-        shoppingListView.activityIndicator.startAnimating()
-        
-        var components = URLComponents()
-        
-        components.scheme = "https"
-        components.host = "openapi.naver.com"
-        components.path = "/v1/search/shop.json"
-        
-        components.queryItems = [
-            URLQueryItem(name: "query", value: keyword),
-            URLQueryItem(name: "display", value: "30"),
-            URLQueryItem(name: "sort", value: "\(sort)"),
-            URLQueryItem(name: "start", value: "\(start)")
-        ]
-        
-        guard let url = components.url else {
-            print("url 에러")
-            return
-        }
-        
-        //        var url = APIKey.shoppingURL
-        //        url += keyword
-        //        url += "&display=30"
-        //        url += "&sort=\(sort)"
-        //        url += "&start=\(start)"
-        
-        print(url)
-        let header: HTTPHeaders = [
-            "X-Naver-Client-Id": APIKey.clientID,
-            "X-Naver-Client-Secret": APIKey.clientSecret
-        ]
-        
-        AF.request(url, method: .get, headers: header)
-            .validate(statusCode: 200..<300)
-        // 기본적으로 MainThread에서 실행됨
-            .responseDecodable(of: Shopping.self) { response in
+        NetworkManager.shared.filteredCallRequest(keyword: keyword, sort: sort, start: self.start) { [weak self] result in
+            switch result {
+            case .success(let value):
+                // print("sucess", value)
+                // 지금실행하는 코드가 main인지
+                print(Thread.isMainThread)
                 
-                // ActivityIndicator 멈추기
-                self.shoppingListView.activityIndicator.stopAnimating ()
+                self?.list.items.append(contentsOf: value.items)
+                self?.list.total = value.total
+                self?.start += value.items.count
+                self?.shoppingListView.shoppingListCollectionView.reloadData()
                 
-                switch response.result {
-                case .success(let value):
-                    // print("sucess", value)
-                    // 지금실행하는 코드가 main인지
-                    print(Thread.isMainThread)
-                    
-                    self.list.items.append(contentsOf: value.items)
-                    self.list.total = value.total
-                    self.shoppingListView.shoppingListCollectionView.reloadData()
-                    
-                    
-                    // start 가 1이면, 컬렉션뷰 리로드를 한 다음에 스크롤을 최상단으로 올려줌
-                    if self.start == 1 {
-                        self.shoppingListView.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-                    }
-                    
-                case .failure(let error):
-                    print("error", error)
-                    if let statusCode = response.response?.statusCode,
-                       statusCode == 429 {
-                        print("-------------------------429-------------------------------")
-                        self.showAlert(title: "요청 제한", message: "요청이 너무 많아요\n 잠시 후 다시 시도해주세요.", preferredStyle: .alert)
-                    }
+                
+                // start 가 1이면, 컬렉션뷰 리로드를 한 다음에 스크롤을 최상단으로 올려줌
+                if self?.start == 1 {
+                    self?.shoppingListView.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
                 }
+            case .failure(let error):
+                print(error)
             }
+            
+        }
     }
     
+
     private func callRequestHorizontalCell(keyword: String) {
         NetworkManager.shared.callRequest(keyword: keyword) { [weak self] result in
             print(#function)
@@ -434,7 +389,6 @@ extension ShoppingListViewController: UICollectionViewDelegate {
             //
             if indexPath.item == (list.items.count - 5) && list.items.count < list.total {
                 print(#function, indexPath.item)
-                //start += 30
                 filteredCallRequest(keyword: navigationTitle, sort: currenSortButton)
             } else if list.items.count >= list.total {
                 print("====================마지막페이지=============================")
@@ -444,8 +398,8 @@ extension ShoppingListViewController: UICollectionViewDelegate {
             if indexPath.item == (horizontalList.items.count - 3) && horizontalList.items.count < horizontalList.total{
                 print("shoppingListHorizontalCollectionView 페이지네이션 실행")
                 callRequestHorizontalCell(keyword: "TensorFlow")
-            } else if list.items.count >= list.total {
-                print("========================블루베리 마지막페이지=============================")
+            } else if horizontalList.items.count >= list.total {
+                print("========================TensorFlow 마지막페이지=============================")
             }
         }
     }
