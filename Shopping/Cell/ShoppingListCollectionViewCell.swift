@@ -163,9 +163,11 @@ final class ShoppingListCollectionViewCell: BaseCollectionViewCell {
         let imageName = isLiked ? "heart.fill" : "heart"
         likeButton.setImage(UIImage(systemName: imageName), for: .normal)
     }
-//    
-//    override func prepareForReuse() {
-//        super.prepareForReuse()
-//        likeButton.setImage(UIImage(systemName: "heart"), for: .normal)
-//    }
+    
+    // 셀 재사용 시 좋아요 버튼 상태 초기화 처리
+    // 좋아요 버튼이 눌리면 다른지점에서도 보였음
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        likeButton.setImage(UIImage(systemName: "heart"), for: .normal)
+    }
 }
