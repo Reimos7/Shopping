@@ -29,7 +29,9 @@ final class HomeViewController: BaseViewController {
         self.navigationController?.navigationBar.titleTextAttributes = [
             NSAttributedString.Key.foregroundColor: UIColor.label
         ]
-        
+        //print(NetworkError.badRequest.networkErrorTitle)
+        //let testError = NetworkError.conflict
+        //showErrorAlert(error: testError)
         //homeView.setupSearchBar()
         
         //let id = Bundle.main.infoDictionary?[X-Naver-Client-Id: X-Naver-Client-Secret]
@@ -60,9 +62,14 @@ final class HomeViewController: BaseViewController {
                     
                 case .failure(let error):
                     print(error)
-                    // TODO: - Enum - 구조체 로 다시 하기
-                    self?.showAlert(title: "에러", message: "네트워크 문제 발생", preferredStyle: .alert)
-
+                    
+                    if let networkError = error as? NetworkError {
+                        self?.showErrorAlert(error: networkError)
+                        print(error.localizedDescription)
+                    } else {
+                        self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
+                        print(error.localizedDescription)
+                    }
                 }
             }
         }

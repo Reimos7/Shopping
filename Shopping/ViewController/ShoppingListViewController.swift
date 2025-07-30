@@ -310,8 +310,13 @@ final class ShoppingListViewController: BaseViewController {
                 }
             case .failure(let error):
                 print(error)
-                // TODO: - Enum - 구조체 로 다시 하기
-                self?.showAlert(title: "에러", message: "네트워크 문제 발생", preferredStyle: .alert)
+                if let networkError = error as? NetworkError {
+                    self?.showErrorAlert(error: networkError)
+                    print(error.localizedDescription)
+                } else {
+                    self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
+                    print(error.localizedDescription)
+                }
             }
             
         }
@@ -330,9 +335,16 @@ final class ShoppingListViewController: BaseViewController {
                 self?.shoppingListView.shoppingListHorizontalCollectionView.reloadData()
                 
             case .failure(let error):
-                print(error)
-                // TODO: - Enum - 구조체 로 다시 하기
-                self?.showAlert(title: "에러", message: "네트워크 문제 발생", preferredStyle: .alert)
+                if let networkError = error as? NetworkError {
+                    self?.showErrorAlert(error: networkError)
+                    print(error.localizedDescription)
+                } else {
+                    self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
+                    print(error.localizedDescription)
+                }
+               
+                //self?.showErrorAlert(error: error as! NetworkError)
+                //self?.showAlert(title: "에러", message: "네트워크 문제 발생", preferredStyle: .alert)
                 
             }
             

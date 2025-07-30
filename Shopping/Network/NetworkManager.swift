@@ -49,7 +49,11 @@ class NetworkManager {
                     completion(.success(value))
                   
                 case .failure(let error):
-                    completion(.failure(error))
+                    let statusCode = response.response?.statusCode ?? 0
+                    // NetWorkError Enum
+                    let networkError = NetworkError(rawValue: statusCode) ?? .unknown
+                    
+                    completion(.failure(networkError))
             }
         }
     }
@@ -94,8 +98,12 @@ class NetworkManager {
                     completion(.success(value))
                     
                 case .failure(let error):
-                    completion(.failure(error))
-                   
+                    let statusCode = response.response?.statusCode ?? 0
+                    // NetWorkError Enum
+                    let networkError = NetworkError(rawValue: statusCode) ?? .unknown
+                    
+                    completion(.failure(networkError))
+                
             }
         }
     }

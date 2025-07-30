@@ -23,6 +23,15 @@ extension UIViewController {
         present(alert, animated: true)
     }
     
+    // 에러 전용 alert
+    // NetworkError는 네트워크 전용 Enum
+    func showErrorAlert(error: NetworkError) {
+        let alert = UIAlertController(title: error.networkErrorTitle, message: error.networkErrorDescription, preferredStyle: .alert)
+        let cancel = UIAlertAction(title: "닫기", style: .cancel)
+        
+        alert.addAction(cancel)
+        present(alert, animated: true)
+    }
     
     // VC에 네비게이션 컨트롤러 -> push , present
     func transitionVC(_ vc: UIViewController, style: ScreenTransition) {
