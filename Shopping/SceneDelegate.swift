@@ -16,9 +16,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         // 네비게이션 적용 
         window = UIWindow(windowScene: windowScene)
-        let mainViewController = HomeViewController()
-        let navigationController = UINavigationController(rootViewController: mainViewController)
-        window?.rootViewController = navigationController
+        
+        
+        // MARK: - AuthVC에 저장한 userDefuaults가 있는지 없는지에 따라 분기처리
+        let login = UserDefaults.standard.bool(forKey: "AuthKey")
+        
+        if login {
+            let mainViewController = HomeViewController()
+            let navigationController = UINavigationController(rootViewController: mainViewController)
+            window?.rootViewController = navigationController
+        } else {
+            let authVC = AuthViewController()
+            let navigationController = UINavigationController(rootViewController: authVC)
+            window?.rootViewController = navigationController
+        }
+        
+        
+        
         window?.makeKeyAndVisible()
     }
 
