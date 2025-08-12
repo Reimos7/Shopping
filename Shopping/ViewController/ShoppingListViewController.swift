@@ -11,6 +11,8 @@ import Alamofire
 
 final class ShoppingListViewController: BaseViewController {
     
+    let viewModel = ShoppingListViewModel()
+    
     let shoppingListView = ShoppingListView()
     
     var currenSortButton: SortOption = .sim
@@ -31,6 +33,8 @@ final class ShoppingListViewController: BaseViewController {
         super.viewDidLoad()
         
         self.navigationItem.title = navigationTitle
+        print("네비----------------------------------------------")
+        print(navigationTitle)
         
         configureCollectionView(sectionInsets: 10, minimumSpacing: 10, cellCount: 2, itemSpacing: 10, lineSpacing: 10, scrollDirectoin: .vertical)
         
@@ -44,6 +48,20 @@ final class ShoppingListViewController: BaseViewController {
         shoppingListView.shoppingListHorizontalCollectionView.delegate = self
         
         callRequestHorizontalCell(keyword: "TensorFlow")
+        
+        viewModel.changeFilterButton(keyword: navigationTitle, sort: .sim)
+        
+        bindData()
+    }
+    
+    // MARK: - bindData
+    private func bindData() {
+        viewModel.shoppingList.bind { shoppingList in
+            self.list = shoppingList
+            
+            
+            self.shoppingListView.shoppingListCollectionView.reloadData()
+        }
     }
     
     // 가로 스크롤 컬렉션뷰 셀
@@ -265,23 +283,24 @@ final class ShoppingListViewController: BaseViewController {
         switch sortOption {
         case .sim:
             //tappedButtonSwitchColor(button: sender)
-            filteredCallRequest(keyword: navigationTitle, sort: .sim)
+            //filteredCallRequest(keyword: navigationTitle, sort: .sim)
+            viewModel.changeFilterButton(keyword: navigationTitle, sort: .sim)
             //print(sortOption)
             currenSortButton = sortOption
             print("정확도")
         case .date:
             //tappedButtonSwitchColor(button: sender)
-            filteredCallRequest(keyword: navigationTitle, sort: .date)
+            viewModel.changeFilterButton(keyword: navigationTitle, sort: .date)
             currenSortButton = sortOption
             print("날짜순")
         case .dsc:
             //tappedButtonSwitchColor(button: sender)
-            filteredCallRequest(keyword: navigationTitle, sort: .dsc)
+            viewModel.changeFilterButton(keyword: navigationTitle, sort: .dsc)
             currenSortButton = sortOption
             print("가격 높은순")
         case .asc:
             //tappedButtonSwitchColor(button: sender)
-            filteredCallRequest(keyword: navigationTitle, sort: .asc)
+            viewModel.changeFilterButton(keyword: navigationTitle, sort: .asc)
             currenSortButton = sortOption
             print("가격 낮은순")
         }
@@ -290,37 +309,37 @@ final class ShoppingListViewController: BaseViewController {
     
    
     
-    private func filteredCallRequest(keyword: String, sort: SortOption) {
-        NetworkManager.shared.filteredCallRequest(keyword: keyword, sort: sort, start: self.start) { [weak self] result in
-            switch result {
-            case .success(let value):
-                // print("sucess", value)
-                // 지금실행하는 코드가 main인지
-                print(Thread.isMainThread)
-                
-                self?.list.items.append(contentsOf: value.items)
-                self?.list.total = value.total
-                self?.start += value.items.count
-                self?.shoppingListView.shoppingListCollectionView.reloadData()
-                
-                
-                // start 가 1이면, 컬렉션뷰 리로드를 한 다음에 스크롤을 최상단으로 올려줌
-                if self?.start == 1 {
-                    self?.shoppingListView.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-                }
-            case .failure(let error):
-                print(error)
-                if let networkError = error as? NetworkError {
-                    self?.showErrorAlert(error: networkError)
-                    print(error.localizedDescription)
-                } else {
-                    self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
-                    print(error.localizedDescription)
-                }
-            }
-            
-        }
-    }
+//    private func filteredCallRequest(keyword: String, sort: SortOption) {
+//        NetworkManager.shared.filteredCallRequest(keyword: keyword, sort: sort, start: self.start) { [weak self] result in
+//            switch result {
+//            case .success(let value):
+//                // print("sucess", value)
+//                // 지금실행하는 코드가 main인지
+//                print(Thread.isMainThread)
+//                
+//                self?.list.items.append(contentsOf: value.items)
+//                self?.list.total = value.total
+//                self?.start += value.items.count
+//                self?.shoppingListView.shoppingListCollectionView.reloadData()
+//                
+//                
+//                // start 가 1이면, 컬렉션뷰 리로드를 한 다음에 스크롤을 최상단으로 올려줌
+//                if self?.start == 1 {
+//                    self?.shoppingListView.shoppingListCollectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+//                }
+//            case .failure(let error):
+//                print(error)
+//                if let networkError = error as? NetworkError {
+//                    self?.showErrorAlert(error: networkError)
+//                    print(error.localizedDescription)
+//                } else {
+//                    self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
+//                    print(error.localizedDescription)
+//                }
+//            }
+//            
+//        }
+//    }
     
 
     private func callRequestHorizontalCell(keyword: String) {
@@ -405,7 +424,8 @@ extension ShoppingListViewController: UICollectionViewDelegate {
             //
             if indexPath.item == (list.items.count - 5) && list.items.count < list.total {
                 print(#function, indexPath.item)
-                filteredCallRequest(keyword: navigationTitle, sort: currenSortButton)
+                //filteredCallRequest(keyword: navigationTitle, sort: currenSortButton)
+                viewModel.changeFilterButton(keyword: navigationTitle, sort: viewModel.currentSortButton.value)
             } else if list.items.count >= list.total {
                 print("====================마지막페이지=============================")
             }
