@@ -13,7 +13,7 @@ enum SortOption: Int {
     case date   // 날짜순
     case dsc    // 가격 높은순
     case asc    // 가격 낮은순
-    
+ 
     var sortOption: String {
         switch self {
         case .sim:
@@ -27,3 +27,5 @@ enum SortOption: Int {
         }
     }
 }
+// enum이 뭘까
+//SortOption(rawValue: 3)

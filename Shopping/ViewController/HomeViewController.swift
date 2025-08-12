@@ -14,6 +14,7 @@ final class HomeViewController: BaseViewController {
     let homeView = HomeView()
   
     var list: Shopping = Shopping(total: 0, display: 0, start: 0, items: [])
+    // var list: Shopping? 이렇게 하는건 어떤지..? 위에처럼 하면 의미 없는 초기화를 해서 메모리상에 올려주는데..  이런식으로 하면 항상 밑에서 옵셔널 바인딩을 해줘야.?
     
     // 밑 바탕의 뷰를 교체함
     // rootview를 만드는 역할
