@@ -10,6 +10,9 @@ import SnapKit
 import Alamofire
 
 final class HomeViewController: BaseViewController {
+    
+    let viewModel = HomeViewModel()
+    
     // HomeView 가져오기
     let homeView = HomeView()
   
@@ -40,42 +43,64 @@ final class HomeViewController: BaseViewController {
 //        let pwd = Bundle.main.object(forInfoDictionaryKey: <#T##String#>)
 //        print(id)
         homeView.searchBar.delegate = self
+        
+        bindData()
     }
     
-    // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
-    private func callRequest(keyword: String) {
-        NetworkManager.shared.callRequest(keyword: keyword) { [weak self] result in
-            // ui는 메인쓰레드에서 ㄱ
-            DispatchQueue.main.async {
-                // <Shopping, Error>
-                switch result {
-                case .success(let value):
-                    let shoppingListVC = ShoppingListViewController()
-                    print(#function, "네트워킹 검색")
-                    shoppingListVC.navigationTitle = keyword
-                    shoppingListVC.list = value
-                    // 서치바 검색창 비워주기 -> push 후 다시 돌아오면 사용자가 검색어를 바로 입력할 수 있게 해줌
-                    //self.homeView.searchBar.text = ""
-                    // VC Extension - push 적용
-                    self?.transitionVC(shoppingListVC, style: .push)
-                    //self.transitionVC(shoppingListVC, style: .present)
-                    //self.navigationController?.pushViewController(shoppingListVC, animated: true)
-                    
-                case .failure(let error):
-                    print(error)
-                    
-                    if let networkError = error as? NetworkError {
-                        self?.showErrorAlert(error: networkError)
-                        print(error.localizedDescription)
-                    } else {
-                        self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
-                        print(error.localizedDescription)
-                    }
-                }
-            }
+    // MARK: - bindData
+    func bindData() {
+        // 2글자 미만 입력 시 에러
+        viewModel.outputErrorAlert.lazyBind { errorMessage in
+            self.showAlert(title: "에러", message: errorMessage, preferredStyle: .alert)
         }
-
+        
+        // 쇼핑
+        viewModel.outputShoppingList.lazyBind { shoppingList in
+            guard let list = shoppingList else {return}
+            let shoppingVC = ShoppingListViewController()
+           
+            // 내가 입력한 텍스트 그 자체가 네비게이션 타이틀임
+            shoppingVC.navigationTitle = self.viewModel.inputText.value
+            shoppingVC.list = list
+            
+            self.transitionVC(shoppingVC, style: .push)
+            
+        }
     }
+    
+//    // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
+//    private func callRequest(keyword: String) {
+//        NetworkManager.shared.callRequest(keyword: keyword) { [weak self] result in
+//            // ui는 메인쓰레드에서 ㄱ
+//            DispatchQueue.main.async {
+//                // <Shopping, Error>
+//                switch result {
+//                case .success(let value):
+//                    let shoppingListVC = ShoppingListViewController()
+//                    print(#function, "네트워킹 검색")
+//                    shoppingListVC.navigationTitle = keyword
+//                    shoppingListVC.list = value
+//                    // 서치바 검색창 비워주기 -> push 후 다시 돌아오면 사용자가 검색어를 바로 입력할 수 있게 해줌
+//                    //self.homeView.searchBar.text = ""
+//                    // VC Extension - push 적용
+//                    self?.transitionVC(shoppingListVC, style: .push)
+//                    //self.transitionVC(shoppingListVC, style: .present)
+//                    //self.navigationController?.pushViewController(shoppingListVC, animated: true)
+//                    
+//                case .failure(let error):
+//                    print(error)
+//                    
+//                    if let networkError = error as? NetworkError {
+//                        self?.showErrorAlert(error: networkError)
+//                        print(error.localizedDescription)
+//                    } else {
+//                        self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
+//                        print(error.localizedDescription)
+//                    }
+//                }
+//            }
+//        }
+//    }
    
     
     override func configureView() {
@@ -111,30 +136,12 @@ extension HomeViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         print(#function)
         
-        guard let searchText = searchBar.text else {return}
+        //guard let searchText = searchBar.text else {return}
         
-        // 공백 제거
-        let trimmedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.inputText.value = searchBar.text ?? ""
         
-        // 공백이거나 2글자 미만인 경우 alert 실행
-        if trimmedSearchText.isEmpty || trimmedSearchText.count < 2 {
-            showAlert(title: "검색 오류", message: "공백이거나 2글자 미만입니다.\n2글자 이상 입력 부탁드립니다.", preferredStyle: .alert)
-            return
-        }
-        // 2글자 이상 입력시 화면 전환
-        callRequest(keyword: trimmedSearchText)
-        
-       // if searchText.count >= 2 {
-           // callRequest(keyword: searchText)
-//            let shoppingList = ShoppingListViewController()
-//            shoppingList.navigationTitle = searchText
-//            shoppingList.list = list
-//            
-//            navigationController?.pushViewController(shoppingList, animated: true)
-//            
-           
-       // }
+       
         
     }
-    
+   
 }

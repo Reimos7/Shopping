@@ -58,6 +58,43 @@ class NetworkManager {
         }
     }
     
+//    func searchShopping(keyword: String, competionHandler: @escaping (Shopping, Error) -> Void) {
+//        NetworkManager.shared.callRequest(keyword: keyword) { [weak self] result in
+//            // ui는 메인쓰레드에서 ㄱ
+//            DispatchQueue.main.async {
+//                // <Shopping, Error>
+//                switch result {
+//                case .success(let value):
+//                    let shoppingListVC = ShoppingListViewController()
+//                    print(#function, "네트워킹 검색")
+//                    shoppingListVC.navigationTitle = keyword
+//                    shoppingListVC.list = value
+//                    
+//                    
+//                    
+//                    // 서치바 검색창 비워주기 -> push 후 다시 돌아오면 사용자가 검색어를 바로 입력할 수 있게 해줌
+//                    //self.homeView.searchBar.text = ""
+//                    // VC Extension - push 적용
+//                    //self?.transitionVC(shoppingListVC, style: .push)
+//                    //self.transitionVC(shoppingListVC, style: .present)
+//                    //self.navigationController?.pushViewController(shoppingListVC, animated: true)
+//                    
+//                case .failure(let error):
+//                    print(error)
+//                    
+//                    if let networkError = error as? NetworkError {
+//                       // self?.showErrorAlert(error: networkError)
+//                        print(error.localizedDescription)
+//                    } else {
+//                        //self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
+//                        print(error.localizedDescription)
+//                    }
+//                }
+//            }
+//        }
+//
+//    }
+    
     // MARK: - 키워드 검색을 통한 네이버 쇼핑 API 호출
     func filteredCallRequest(keyword: String, sort: SortOption, start: Int ,completion: @escaping (Result<Shopping, Error>) -> Void) {
         print(#function, "API 호출~~~~~~~~~~~~~~~")
