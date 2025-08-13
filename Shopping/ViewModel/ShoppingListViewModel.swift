@@ -17,6 +17,8 @@ final class ShoppingListViewModel {
     struct Input {
         // viewDidLoad 생명주기 트리거
         var viewDidLoadTrigger: Observable<Void> = Observable(())
+        // 정렬 버튼 클릭
+       // var sortButtonTapped: Observable<Void> = Observable(())
     }
     
     struct Output {
@@ -41,6 +43,10 @@ final class ShoppingListViewModel {
         input.viewDidLoadTrigger.bind { _ in
             self.callReqeustHorizontal(keyword: "apple", sort: .sim)
         }
+        
+//        input.sortButtonTapped.bind { _ in
+//            self.changeFilterButton(keyword: "" , sort: .sim)
+//        }
     }
     
     

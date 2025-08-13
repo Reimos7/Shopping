@@ -19,17 +19,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         
         // MARK: - AuthVC에 저장한 userDefuaults가 있는지 없는지에 따라 분기처리
-        let login = UserDefaults.standard.bool(forKey: "AuthKey")
+//        let login = UserDefaults.standard.bool(forKey: "AuthKey")
+//        
+//        if login {
+//            let mainViewController = HomeViewController()
+//            let navigationController = UINavigationController(rootViewController: mainViewController)
+//            window?.rootViewController = navigationController
+//        } else {
+//            let authVC = AuthViewController()
+//            let navigationController = UINavigationController(rootViewController: authVC)
+//            window?.rootViewController = navigationController
+//        }
         
-        if login {
-            let mainViewController = HomeViewController()
-            let navigationController = UINavigationController(rootViewController: mainViewController)
-            window?.rootViewController = navigationController
-        } else {
-            let authVC = AuthViewController()
-            let navigationController = UINavigationController(rootViewController: authVC)
-            window?.rootViewController = navigationController
-        }
+       
+        let nav = UINavigationController(rootViewController: HomeViewController())
+        window?.rootViewController = nav
+       
         
         
         
