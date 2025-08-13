@@ -47,7 +47,7 @@ final class ShoppingListViewController: BaseViewController {
         shoppingListView.shoppingListHorizontalCollectionView.dataSource = self
         shoppingListView.shoppingListHorizontalCollectionView.delegate = self
         
-        callRequestHorizontalCell(keyword: "TensorFlow")
+        //callRequestHorizontalCell(keyword: "TensorFlow")
         
         viewModel.changeFilterButton(keyword: navigationTitle, sort: .sim)
         
@@ -56,11 +56,20 @@ final class ShoppingListViewController: BaseViewController {
     
     // MARK: - bindData
     private func bindData() {
-        viewModel.shoppingList.bind { shoppingList in
+        // viewDidLoad 시점의 신호를 VM으로 보내기
+        viewModel.input.viewDidLoadTrigger.value = ()
+        
+        
+        // 일반 컬렉션뷰
+        viewModel.output.shoppingList.bind { shoppingList in
             self.list = shoppingList
-            
-            
             self.shoppingListView.shoppingListCollectionView.reloadData()
+        }
+        
+        
+        viewModel.output.shoppingListHorizontal.bind { shoppingList in
+            self.horizontalList = shoppingList
+            self.shoppingListView.shoppingListHorizontalCollectionView.reloadData()
         }
     }
     
@@ -280,30 +289,33 @@ final class ShoppingListViewController: BaseViewController {
         // 버튼의 tag 값을 기반으로 SortOption enum으로 변환
         let sortOption = SortOption(rawValue: sender.tag) ?? .sim
         
-        switch sortOption {
-        case .sim:
-            //tappedButtonSwitchColor(button: sender)
-            //filteredCallRequest(keyword: navigationTitle, sort: .sim)
-            viewModel.changeFilterButton(keyword: navigationTitle, sort: .sim)
-            //print(sortOption)
-            currenSortButton = sortOption
-            print("정확도")
-        case .date:
-            //tappedButtonSwitchColor(button: sender)
-            viewModel.changeFilterButton(keyword: navigationTitle, sort: .date)
-            currenSortButton = sortOption
-            print("날짜순")
-        case .dsc:
-            //tappedButtonSwitchColor(button: sender)
-            viewModel.changeFilterButton(keyword: navigationTitle, sort: .dsc)
-            currenSortButton = sortOption
-            print("가격 높은순")
-        case .asc:
-            //tappedButtonSwitchColor(button: sender)
-            viewModel.changeFilterButton(keyword: navigationTitle, sort: .asc)
-            currenSortButton = sortOption
-            print("가격 낮은순")
-        }
+        viewModel.changeFilterButton(keyword: navigationTitle, sort: sortOption)
+        //print(sortOption)
+        currenSortButton = sortOption
+        
+        
+//        switch sortOption {
+//        case .sim:
+//            //tappedButtonSwitchColor(button: sender)
+//            //filteredCallRequest(keyword: navigationTitle, sort: .sim)
+//            
+//            print("정확도")
+//        case .date:
+//            //tappedButtonSwitchColor(button: sender)
+//            viewModel.changeFilterButton(keyword: navigationTitle, sort: .date)
+//            currenSortButton = sortOption
+//            print("날짜순")
+//        case .dsc:
+//            //tappedButtonSwitchColor(button: sender)
+//            viewModel.changeFilterButton(keyword: navigationTitle, sort: .dsc)
+//            currenSortButton = sortOption
+//            print("가격 높은순")
+//        case .asc:
+//            //tappedButtonSwitchColor(button: sender)
+//            viewModel.changeFilterButton(keyword: navigationTitle, sort: .asc)
+//            currenSortButton = sortOption
+//            print("가격 낮은순")
+//        }
     }
     
     
@@ -342,34 +354,34 @@ final class ShoppingListViewController: BaseViewController {
 //    }
     
 
-    private func callRequestHorizontalCell(keyword: String) {
-        NetworkManager.shared.callRequest(keyword: keyword) { [weak self] result in
-            print(#function)
-            // <Shopping, Error>
-            switch result {
-            case .success(let value):
-                
-                self?.horizontalList.items.append(contentsOf: value.items)
-                self?.horizontalList.total = value.total
-                self?.shoppingListView.shoppingListHorizontalCollectionView.reloadData()
-                
-            case .failure(let error):
-                if let networkError = error as? NetworkError {
-                    self?.showErrorAlert(error: networkError)
-                    print(error.localizedDescription)
-                } else {
-                    self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
-                    print(error.localizedDescription)
-                }
-               
-                //self?.showErrorAlert(error: error as! NetworkError)
-                //self?.showAlert(title: "에러", message: "네트워크 문제 발생", preferredStyle: .alert)
-                
-            }
-            
-        }
-        
-    }
+//    private func callRequestHorizontalCell(keyword: String) {
+//        NetworkManager.shared.callRequest(keyword: keyword) { [weak self] result in
+//            print(#function)
+//            // <Shopping, Error>
+//            switch result {
+//            case .success(let value):
+//                
+//                self?.horizontalList.items.append(contentsOf: value.items)
+//                self?.horizontalList.total = value.total
+//                self?.shoppingListView.shoppingListHorizontalCollectionView.reloadData()
+//                
+//            case .failure(let error):
+//                if let networkError = error as? NetworkError {
+//                    self?.showErrorAlert(error: networkError)
+//                    print(error.localizedDescription)
+//                } else {
+//                    self?.showAlert(title: "에러", message: "에러입니다", preferredStyle: .alert)
+//                    print(error.localizedDescription)
+//                }
+//               
+//                //self?.showErrorAlert(error: error as! NetworkError)
+//                //self?.showAlert(title: "에러", message: "네트워크 문제 발생", preferredStyle: .alert)
+//                
+//            }
+//            
+//        }
+//        
+//    }
 }
 
 // MARK: - UICollectionViewDataSource
@@ -425,7 +437,7 @@ extension ShoppingListViewController: UICollectionViewDelegate {
             if indexPath.item == (list.items.count - 5) && list.items.count < list.total {
                 print(#function, indexPath.item)
                 //filteredCallRequest(keyword: navigationTitle, sort: currenSortButton)
-                viewModel.changeFilterButton(keyword: navigationTitle, sort: viewModel.currentSortButton.value)
+                viewModel.changeFilterButton(keyword: navigationTitle, sort: viewModel.output.currentSortButton.value)
             } else if list.items.count >= list.total {
                 print("====================마지막페이지=============================")
             }
@@ -433,7 +445,8 @@ extension ShoppingListViewController: UICollectionViewDelegate {
             print("shoppingListHorizontalCollectionView 페이지네이션")
             if indexPath.item == (horizontalList.items.count - 3) && horizontalList.items.count < horizontalList.total{
                 print("shoppingListHorizontalCollectionView 페이지네이션 실행")
-                callRequestHorizontalCell(keyword: "TensorFlow")
+              //callRequestHorizontalCell(keyword: "TensorFlow")
+                
             } else if horizontalList.items.count >= list.total {
                 print("========================TensorFlow 마지막페이지=============================")
             }

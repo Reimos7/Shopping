@@ -50,17 +50,17 @@ final class HomeViewController: BaseViewController {
     // MARK: - bindData
     func bindData() {
         // 2글자 미만 입력 시 에러
-        viewModel.outputErrorAlert.lazyBind { errorMessage in
+        viewModel.output.errorAlert.lazyBind { errorMessage in
             self.showAlert(title: "에러", message: errorMessage, preferredStyle: .alert)
         }
         
         // 쇼핑
-        viewModel.outputShoppingList.lazyBind { shoppingList in
+        viewModel.output.shoppingList.lazyBind { shoppingList in
             guard let list = shoppingList else {return}
             let shoppingVC = ShoppingListViewController()
            
             // 내가 입력한 텍스트 그 자체가 네비게이션 타이틀임
-            shoppingVC.navigationTitle = self.viewModel.inputText.value
+            shoppingVC.navigationTitle = self.viewModel.input.text.value
             shoppingVC.list = list
             
             self.transitionVC(shoppingVC, style: .push)
@@ -138,7 +138,7 @@ extension HomeViewController: UISearchBarDelegate {
         
         //guard let searchText = searchBar.text else {return}
         
-        viewModel.inputText.value = searchBar.text ?? ""
+        viewModel.input.text.value = searchBar.text ?? ""
         
        
         
